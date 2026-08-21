@@ -148,6 +148,21 @@ describe("scanContext", () => {
     assert.equal(result.errors[0].file, resolve(join(tempDir, "broken.md")));
     assert.ok(result.errors[0].reason.length > 0);
   });
+
+  test("malformed YAML still errors on a subsequent scan", () => {
+    writeFileSync(
+      join(tempDir, "broken.md"),
+      "---\ntitle: [unclosed\n---\n\n# Broken\n",
+    );
+
+    const first = scanContext(tempDir);
+    const second = scanContext(tempDir);
+
+    assert.equal(first.files.length, 0);
+    assert.equal(first.errors.length, 1);
+    assert.equal(second.files.length, 0);
+    assert.equal(second.errors.length, 1);
+  });
 });
 
 describe("scanContext against repo context/", () => {

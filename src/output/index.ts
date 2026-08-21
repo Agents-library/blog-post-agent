@@ -1,1 +1,3 @@
-// Output file writing and frontmatter — implemented in Phase 6.
+export { buildFrontmatter } from "./frontmatter";
+export type { FrontmatterInput } from "./frontmatter";
+export { writeOutput } from "./write";

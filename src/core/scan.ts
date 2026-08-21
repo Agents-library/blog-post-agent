@@ -1,8 +1,28 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import matter from "gray-matter";
 
 import type { ParsedFile, ScanError, ScanResult } from "./types";
+
+const loadYaml = createRequire(__filename);
+const yaml = loadYaml("js-yaml") as {
+  load: (input: string) => unknown;
+};
+
+function parseFrontmatterYaml(input: string): Record<string, unknown> {
+  const parsed: unknown = yaml.load(input);
+
+  if (parsed === undefined || parsed === null) {
+    return {};
+  }
+
+  if (typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("Frontmatter must be a YAML object.");
+  }
+
+  return parsed as Record<string, unknown>;
+}
 
 export function scanContextFiles(contextDir: string): string[] {
   const resolvedDir = resolve(contextDir);
@@ -23,7 +43,11 @@ export function scanContextFiles(contextDir: string): string[] {
 export function readContextFile(filePath: string): ParsedFile {
   const resolvedPath = resolve(filePath);
   const raw = readFileSync(resolvedPath, "utf8");
-  const { data, content } = matter(raw);
+  const { data, content } = matter(raw, {
+    engines: {
+      yaml: parseFrontmatterYaml,
+    },
+  });
   const frontmatter =
     typeof data === "object" && data !== null && !Array.isArray(data)
       ? (data as Record<string, unknown>)

@@ -4,7 +4,7 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Phase 6 — Output module (next)
+- Phase 9 — Packaging and publish (next)
 
 ## Current Goal
 
@@ -45,6 +45,45 @@ Update this file after every meaningful implementation change.
   one retry on transient 5xx/network errors. Unit tests cover prompt
   structure and all error paths. Manual API smoke test skipped
   (no `ANTHROPIC_API_KEY` in environment). Checklist passed.
+- **Phase 6 — Output module** (2026-08-21): `buildFrontmatter` in
+  `src/output/frontmatter.ts` emits YAML with `title`, `date`,
+  `tags`, and `summary` (inferred title/date/summary when omitted;
+  tags default to `[]`). `writeOutput` creates parent directories
+  and overwrites the resolved path. Unit tests cover frontmatter
+  shape, nested-path creation, overwrite, and gray-matter parsing
+  of the written Markdown file. Checklist passed.
+- **Phase 7 — CLI generate command** (2026-08-21): `blogify generate`
+  in `src/cli/generate.ts` wires `loadConfig` → `scanContext` →
+  `buildPrompt` → `callAnthropic` → `buildFrontmatter` →
+  `writeOutput`. Ora spinners on scan and API steps; yellow warning
+  and clean exit for an empty `context/`; cyan overwrite notice
+  before write; red error line with optional `--verbose` stack.
+  `--dir`/`--out` map to config overrides. Integration test with a
+  mocked Anthropic client writes `output/blog-post.md` with the
+  expected frontmatter shape. Empty-folder warning test passes.
+  Manual run against this repo's `context/` skipped (no
+  `ANTHROPIC_API_KEY` in environment). Checklist passed for
+  automated verification.
+- **Phase 8 — Testing and hardening** (2026-08-21): Invariant
+  and error-path coverage added in `test/hardening.test.mjs`
+  (plus `writeOutput` path confinement in `test/output.test.mjs`).
+  Scaffolding placeholder test removed. `npm test`: 46 passed,
+  0 skipped. Architecture invariants:
+  1. No writes outside the resolved output path — **checked**
+     (automated: `writeOutput` only creates the given path;
+     sibling files stay untouched).
+  2. No fabricated metrics — **checked** via Phase 5 prompt
+     rules (`Never fabricate metrics...`; qualitative impact
+     when sources lack numbers). Manual sample review against
+     live generated posts not run (no `ANTHROPIC_API_KEY`).
+  3. `generate` with zero project-specific config — **checked**
+     (automated: temp dir, no `blogify.config.json`, defaults).
+  4. `context/` never modified or deleted — **checked**
+     (automated: contents/mtimes unchanged after full
+     `generate`).
+  Error paths: malformed `blogify.config.json`, missing
+  `ANTHROPIC_API_KEY`, permission-denied output write. Checklist
+  passed.
 
 ## In Progress
 
@@ -52,15 +91,11 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-- Output module — Phase 6
-- Wire `blogify generate` end to end — Phase 7 (after Phase 6)
+- Phase 9 — Packaging and publish (per `context/plan/00-overview.md`)
 
 ## Open Questions
 
-- Should `blogify generate` overwrite `output/blog-post.md` by
-  default, or prompt/timestamp when a file already exists?
-- Should the output filename be derived from the project name,
-  or always fixed as `blog-post.md`?
+- None currently.
 
 ## Architecture Decisions
 
@@ -78,6 +113,13 @@ Update this file after every meaningful implementation change.
   2026-08-21, Phase 3)
 - Technical PM/Consultant is the only tone/style for v1;
   additional style presets deferred to a later version
+- `writeOutput()` overwrites `output/blog-post.md` by default on
+  each run — generated file, safe to overwrite; the CLI layer
+  (Phase 7) warns the user before the write (decided 2026-08-21,
+  Phase 6)
+- Output filename stays fixed as `blog-post.md` (or the `--out`
+  override) rather than being derived from a detected project
+  name (decided 2026-08-21, Phase 6)
 
 ## Session Notes
 
@@ -88,3 +130,4 @@ Update this file after every meaningful implementation change.
 - Source files were recreated from scratch; `dist/` and
   `node_modules/` from a prior partial run were retained and
   rebuilt via `npm run build`
+- `ora@5.4.1` added in Phase 7 (CommonJS, matches `chalk@4`)

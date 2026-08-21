@@ -7,8 +7,21 @@ exports.scanContextFiles = scanContextFiles;
 exports.readContextFile = readContextFile;
 exports.scanContext = scanContext;
 const node_fs_1 = require("node:fs");
+const node_module_1 = require("node:module");
 const node_path_1 = require("node:path");
 const gray_matter_1 = __importDefault(require("gray-matter"));
+const loadYaml = (0, node_module_1.createRequire)(__filename);
+const yaml = loadYaml("js-yaml");
+function parseFrontmatterYaml(input) {
+    const parsed = yaml.load(input);
+    if (parsed === undefined || parsed === null) {
+        return {};
+    }
+    if (typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("Frontmatter must be a YAML object.");
+    }
+    return parsed;
+}
 function scanContextFiles(contextDir) {
     const resolvedDir = (0, node_path_1.resolve)(contextDir);
     if (!(0, node_fs_1.existsSync)(resolvedDir)) {
@@ -24,7 +37,11 @@ function scanContextFiles(contextDir) {
 function readContextFile(filePath) {
     const resolvedPath = (0, node_path_1.resolve)(filePath);
     const raw = (0, node_fs_1.readFileSync)(resolvedPath, "utf8");
-    const { data, content } = (0, gray_matter_1.default)(raw);
+    const { data, content } = (0, gray_matter_1.default)(raw, {
+        engines: {
+            yaml: parseFrontmatterYaml,
+        },
+    });
     const frontmatter = typeof data === "object" && data !== null && !Array.isArray(data)
         ? data
         : {};

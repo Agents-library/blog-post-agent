@@ -19,7 +19,8 @@
     "@anthropic-ai/sdk": "0.117.1",
     "chalk": "^4.1.2",
     "commander": "^12.1.0",
-    "gray-matter": "^4.0.3"
+    "gray-matter": "^4.0.3",
+    "ora": "^5.4.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

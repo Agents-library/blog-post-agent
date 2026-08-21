@@ -1,1 +1,3 @@
-// Prompt construction and Anthropic API calls — implemented in Phase 5.
+export { buildPrompt, BLOG_SECTIONS } from "./prompt";
+export { callAnthropic } from "./client";
+export type { AnthropicClient } from "./client";

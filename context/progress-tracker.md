@@ -4,7 +4,7 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Phase 4 — CLI init command (next)
+- Phase 6 — Output module (next)
 
 ## Current Goal
 
@@ -31,6 +31,20 @@ Update this file after every meaningful implementation change.
   collection, missing-dir throws, empty-dir returns `[]`. Unit tests
   cover all four scenarios; real `context/` scan returns 6 files
   with zero errors. Checklist passed.
+- **Phase 4 — CLI init command** (2026-08-21): `blogify init`
+  scaffolds `context/` and `output/` via `runInit` in
+  `src/cli/init.ts`. Supports `--dir`/`--out` overrides, green
+  created / cyan already-exists messages per `ui-context.md`. Second
+  run is a no-op. Unit tests cover fresh dir, idempotent re-run,
+  and custom paths. Checklist passed.
+- **Phase 5 — Generator module** (2026-08-21): `buildPrompt` in
+  `src/generator/prompt.ts` with fixed Technical PM/Consultant
+  template and synthesis rules; `callAnthropic` in
+  `src/generator/client.ts` wraps `@anthropic-ai/sdk` with API key
+  validation, response validation, distinct error messages, and
+  one retry on transient 5xx/network errors. Unit tests cover prompt
+  structure and all error paths. Manual API smoke test skipped
+  (no `ANTHROPIC_API_KEY` in environment). Checklist passed.
 
 ## In Progress
 
@@ -38,8 +52,8 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-- Implement `blogify init` — Phase 4
-- Wire `blogify generate` end to end — Phase 7 (after Phases 5, 6)
+- Output module — Phase 6
+- Wire `blogify generate` end to end — Phase 7 (after Phase 6)
 
 ## Open Questions
 

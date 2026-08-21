@@ -1,0 +1,29 @@
+{
+  "name": "blogify",
+  "version": "0.1.0",
+  "description": "Generate a Technical PM/Consultant-style blog post from project context Markdown files",
+  "license": "MIT",
+  "bin": {
+    "blogify": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/cli/index.ts",
+    "lint": "eslint src --ext .ts",
+    "test": "node --test test/**/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.18.1",
+    "@typescript-eslint/parser": "^8.18.1",
+    "eslint": "^8.57.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}

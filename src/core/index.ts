@@ -1,1 +1,6 @@
-// File scanning and MD parsing — implemented in Phase 3.
+export {
+  readContextFile,
+  scanContext,
+  scanContextFiles,
+} from "./scan";
+export type { ParsedFile, ScanError, ScanResult } from "./types";

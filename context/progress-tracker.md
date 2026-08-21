@@ -4,7 +4,7 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Phase 3 — Core file scanning (next)
+- Phase 4 — CLI init command (next)
 
 ## Current Goal
 
@@ -25,6 +25,12 @@ Update this file after every meaningful implementation change.
   shape validation, and merge precedence (CLI > file > defaults).
   Unit tests cover all four verification scenarios. Checklist
   passed.
+- **Phase 3 — Core file scanning** (2026-08-21): `scanContextFiles`,
+  `readContextFile`, and `scanContext` in `src/core/` using Node
+  `fs` and `gray-matter`. Non-recursive `.md` scan, per-file error
+  collection, missing-dir throws, empty-dir returns `[]`. Unit tests
+  cover all four scenarios; real `context/` scan returns 6 files
+  with zero errors. Checklist passed.
 
 ## In Progress
 
@@ -32,9 +38,8 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-- Implement `context/` file scanning (`src/core`) — Phase 3
 - Implement `blogify init` — Phase 4
-- Wire `blogify generate` end to end — Phase 7 (after Phases 3, 5, 6)
+- Wire `blogify generate` end to end — Phase 7 (after Phases 5, 6)
 
 ## Open Questions
 
@@ -53,6 +58,10 @@ Update this file after every meaningful implementation change.
 - Config merge precedence: CLI overrides > `blogify.config.json` >
   defaults in `src/config/defaults.ts` (decided 2026-08-21,
   Phase 2)
+- Context scan is non-recursive and flat — only top-level `.md`
+  files in `contextDir` are read; one bad file is skipped and
+  reported in `errors` without aborting the scan (decided
+  2026-08-21, Phase 3)
 - Technical PM/Consultant is the only tone/style for v1;
   additional style presets deferred to a later version
 

@@ -11,9 +11,11 @@ const node_path_1 = require("node:path");
 const chalk_1 = __importDefault(require("chalk"));
 const ora_1 = __importDefault(require("ora"));
 const config_1 = require("../config");
+const credentials_1 = require("../config/credentials");
 const core_1 = require("../core");
 const generator_1 = require("../generator");
 const output_1 = require("../output");
+const setup_1 = require("./setup");
 function formatDisplayPath(absolutePath, cwd) {
     const displayPath = (0, node_path_1.relative)(cwd, absolutePath) || absolutePath;
     return displayPath.replace(/\\/g, "/");
@@ -87,14 +89,19 @@ async function runGenerate(options = {}, deps = {}) {
         }
         throw error;
     }
-    const apiSpinner = (0, ora_1.default)("Calling Anthropic API...").start();
+    const provider = deps.client === undefined ? await (0, setup_1.ensureApiSetup)() : undefined;
+    const providerName = provider ? (0, credentials_1.providerLabel)(provider) : "Anthropic";
+    const apiSpinner = (0, ora_1.default)(`Calling ${providerName} API...`).start();
     let body;
     try {
-        body = await (0, generator_1.callAnthropic)(prompt, deps.client);
+        body = await (0, generator_1.generateCompletion)(prompt, {
+            client: deps.client,
+            provider,
+        });
         apiSpinner.succeed("Generated blog post content");
     }
     catch (error) {
-        apiSpinner.fail("Anthropic API call failed");
+        apiSpinner.fail(`${providerName} API call failed`);
         throw error;
     }
     if ((0, node_fs_1.existsSync)(outputPath)) {

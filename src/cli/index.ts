@@ -3,6 +3,7 @@
 import { Command } from "commander";
 import { registerGenerateCommand } from "./generate";
 import { registerInitCommand } from "./init";
+import { registerSetupCommand } from "./setup";
 
 const program = new Command();
 
@@ -15,5 +16,6 @@ program
 
 registerInitCommand(program);
 registerGenerateCommand(program);
+registerSetupCommand(program);
 
-program.parse();
+void program.parseAsync();

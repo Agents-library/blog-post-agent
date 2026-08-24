@@ -39,6 +39,7 @@ function runInit(cwd, options = {}) {
     const anyCreated = contextResult.created || outputResult.created;
     if (anyCreated) {
         console.log(chalk_1.default.green(`Ready — add Markdown files to ${contextDir} and run blogify generate.`));
+        console.log(chalk_1.default.dim("On first generate, Blogify will ask you to choose a provider and save an API key."));
     }
     else {
         console.log(chalk_1.default.cyan("Nothing to create — folders are already in place."));

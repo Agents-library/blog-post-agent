@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DEFAULT_CONFIG = void 0;
+exports.resolveProvider = exports.providerLabel = exports.persistApiKey = exports.loadStoredCredentials = exports.hasAnyApiKey = exports.detectProviderFromKey = exports.applyCredentialsToEnv = exports.PROVIDERS = exports.DEFAULT_CONFIG = void 0;
 exports.validateConfigFile = validateConfigFile;
 exports.loadConfig = loadConfig;
 const node_fs_1 = require("node:fs");
@@ -60,3 +60,12 @@ function loadConfig(cliOverrides = {}) {
 }
 var defaults_2 = require("./defaults");
 Object.defineProperty(exports, "DEFAULT_CONFIG", { enumerable: true, get: function () { return defaults_2.DEFAULT_CONFIG; } });
+var credentials_1 = require("./credentials");
+Object.defineProperty(exports, "PROVIDERS", { enumerable: true, get: function () { return credentials_1.PROVIDERS; } });
+Object.defineProperty(exports, "applyCredentialsToEnv", { enumerable: true, get: function () { return credentials_1.applyCredentialsToEnv; } });
+Object.defineProperty(exports, "detectProviderFromKey", { enumerable: true, get: function () { return credentials_1.detectProviderFromKey; } });
+Object.defineProperty(exports, "hasAnyApiKey", { enumerable: true, get: function () { return credentials_1.hasAnyApiKey; } });
+Object.defineProperty(exports, "loadStoredCredentials", { enumerable: true, get: function () { return credentials_1.loadStoredCredentials; } });
+Object.defineProperty(exports, "persistApiKey", { enumerable: true, get: function () { return credentials_1.persistApiKey; } });
+Object.defineProperty(exports, "providerLabel", { enumerable: true, get: function () { return credentials_1.providerLabel; } });
+Object.defineProperty(exports, "resolveProvider", { enumerable: true, get: function () { return credentials_1.resolveProvider; } });

@@ -48,23 +48,37 @@ function mockClient(text = generatedBody) {
 describe("runGenerate", { concurrency: false }, () => {
   let tempDir;
   let originalCwd;
-  let originalApiKey;
+  let originalEnv;
 
   beforeEach(() => {
     tempDir = mkdtempSync(join(tmpdir(), "blogify-generate-test-"));
     originalCwd = process.cwd();
-    originalApiKey = process.env.ANTHROPIC_API_KEY;
+    originalEnv = {
+      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+      BLOGIFY_PROVIDER: process.env.BLOGIFY_PROVIDER,
+      BLOGIFY_HOME: process.env.BLOGIFY_HOME,
+    };
     process.env.ANTHROPIC_API_KEY = "test-api-key";
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+    delete process.env.BLOGIFY_PROVIDER;
+    process.env.BLOGIFY_HOME = tempDir;
     process.chdir(tempDir);
   });
 
   afterEach(() => {
     process.chdir(originalCwd);
 
-    if (originalApiKey === undefined) {
-      delete process.env.ANTHROPIC_API_KEY;
-    } else {
-      process.env.ANTHROPIC_API_KEY = originalApiKey;
+    for (const [name, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[name];
+      } else {
+        process.env[name] = value;
+      }
     }
 
     rmSync(tempDir, { recursive: true, force: true });
@@ -125,8 +139,8 @@ describe("runGenerate", { concurrency: false }, () => {
     delete process.env.ANTHROPIC_API_KEY;
 
     await assert.rejects(
-      () => runGenerate({}, { client: mockClient() }),
-      /ANTHROPIC_API_KEY environment variable is not set/,
+      () => runGenerate({}),
+      /No API key is configured/,
     );
   });
 

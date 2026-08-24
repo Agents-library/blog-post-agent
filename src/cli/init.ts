@@ -57,6 +57,11 @@ export function runInit(cwd: string, options: InitOptions = {}): void {
         `Ready — add Markdown files to ${contextDir} and run blogify generate.`,
       ),
     );
+    console.log(
+      chalk.dim(
+        "On first generate, Blogify will ask you to choose a provider and save an API key.",
+      ),
+    );
   } else {
     console.log(chalk.cyan("Nothing to create — folders are already in place."));
   }

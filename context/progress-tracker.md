@@ -4,12 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Phase 9 — Packaging and publish (next)
+- v1 complete for local / tarball install (npm publish skipped)
 
 ## Current Goal
 
-- Define and scaffold Blogify v1: `init` + `generate` commands,
-  Technical PM/Consultant blog template
+- Blogify v1 is usable locally and via a packed `.tgz` file
 
 ## Completed
 
@@ -84,6 +83,23 @@ Update this file after every meaningful implementation change.
   Error paths: malformed `blogify.config.json`, missing
   `ANTHROPIC_API_KEY`, permission-denied output write. Checklist
   passed.
+- **Multi-provider API keys** (2026-08-21): First interactive
+  `blogify generate` (or `blogify setup`) prompts for Anthropic,
+  OpenAI, Gemini, or OpenRouter. Pasting a key auto-detects the
+  provider. Keys are saved to `~/.blogify/credentials.json` and
+  Windows user environment variables. Later runs auto-select the
+  last saved provider, or the only available key.
+- **Gemini model update** (2026-08-21): Default Gemini model is
+  `gemini-3.6-flash` (`gemini-2.0-flash` is no longer available).
+
+- **Phase 9 — Local packaging** (2026-08-21): `package.json`
+  `files` is `["dist"]`, `bin` points at `./dist/cli/index.js`
+  (shebang already on the CLI entry). Public `README.md` covers
+  `npm link`, `npm pack`, and `npm install -g ./blogify-0.1.0.tgz`.
+  Local tarball install was verified: `--help` / `--version`,
+  `init` scaffolds folders, empty `generate` prints the empty
+  `context/` warning. **`npm publish` was not run** — install is
+  from this repo or by sending `blogify-0.1.0.tgz`.
 
 ## In Progress
 
@@ -91,7 +107,7 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-- Phase 9 — Packaging and publish (per `context/plan/00-overview.md`)
+- Optional: publish to npm when you want a public `npm install -g blogify`
 
 ## Open Questions
 
@@ -120,11 +136,16 @@ Update this file after every meaningful implementation change.
 - Output filename stays fixed as `blog-post.md` (or the `--out`
   override) rather than being derived from a detected project
   name (decided 2026-08-21, Phase 6)
+- API keys are stored at machine user scope, never in the
+  project: `~/.blogify/credentials.json` plus Windows `setx`
+  user env vars. Provider is auto-detected from key prefixes
+  and auto-selected on later runs (decided 2026-08-21)
 
 ## Session Notes
 
 - Working package name is "blogify" — confirm it's available on
-  npm before publishing
+  npm before publishing (not required while distributing via
+  `.tgz` / `npm link`)
 - Blog post structure is fixed: Situation → Approach → What Was
   Built → Key Decisions → Impact → Lessons/Next
 - Source files were recreated from scratch; `dist/` and

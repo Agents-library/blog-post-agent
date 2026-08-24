@@ -1,3 +1,3 @@
 export { buildPrompt, BLOG_SECTIONS } from "./prompt";
-export { callAnthropic } from "./client";
+export { callAnthropic, generateCompletion } from "./client";
 export type { AnthropicClient } from "./client";

@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, test } from "node:test";
 
 import {
@@ -6,7 +8,7 @@ import {
   InternalServerError,
 } from "@anthropic-ai/sdk";
 
-import { buildPrompt, BLOG_SECTIONS, callAnthropic } from "../dist/generator/index.js";
+import { buildPrompt, BLOG_SECTIONS, callAnthropic, generateCompletion } from "../dist/generator/index.js";
 
 const sampleFiles = [
   {
@@ -54,10 +56,13 @@ describe("buildPrompt", () => {
 
 describe("callAnthropic", () => {
   let originalApiKey;
+  let originalHome;
 
   beforeEach(() => {
     originalApiKey = process.env.ANTHROPIC_API_KEY;
+    originalHome = process.env.BLOGIFY_HOME;
     process.env.ANTHROPIC_API_KEY = "test-api-key";
+    process.env.BLOGIFY_HOME = join(tmpdir(), "blogify-no-creds");
   });
 
   afterEach(() => {
@@ -66,6 +71,12 @@ describe("callAnthropic", () => {
     } else {
       process.env.ANTHROPIC_API_KEY = originalApiKey;
     }
+
+    if (originalHome === undefined) {
+      delete process.env.BLOGIFY_HOME;
+    } else {
+      process.env.BLOGIFY_HOME = originalHome;
+    }
   });
 
   test("throws a clear error when the API key is missing", async () => {
@@ -73,7 +84,7 @@ describe("callAnthropic", () => {
 
     await assert.rejects(
       () => callAnthropic("prompt"),
-      /ANTHROPIC_API_KEY environment variable is not set/,
+      /ANTHROPIC_API_KEY is not set/,
     );
   });
 
@@ -176,5 +187,70 @@ describe("callAnthropic", () => {
       /Anthropic API call failed: invalid request/,
     );
     assert.equal(attempts, 1);
+  });
+});
+
+describe("generateCompletion", () => {
+  let originalEnv;
+  let originalFetch;
+
+  beforeEach(() => {
+    originalEnv = {
+      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+      BLOGIFY_PROVIDER: process.env.BLOGIFY_PROVIDER,
+      BLOGIFY_HOME: process.env.BLOGIFY_HOME,
+    };
+    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+    delete process.env.BLOGIFY_PROVIDER;
+    process.env.BLOGIFY_HOME = join(tmpdir(), "blogify-no-creds");
+    originalFetch = globalThis.fetch;
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+
+    for (const [name, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[name];
+      } else {
+        process.env[name] = value;
+      }
+    }
+  });
+
+  test("calls OpenAI when that provider is selected", async () => {
+    process.env.OPENAI_API_KEY = "sk-test";
+    process.env.BLOGIFY_PROVIDER = "openai";
+
+    globalThis.fetch = async () => ({
+      status: 200,
+      json: async () => ({
+        choices: [{ message: { content: "OpenAI post body" } }],
+      }),
+    });
+
+    const result = await generateCompletion("prompt");
+    assert.equal(result, "OpenAI post body");
+  });
+
+  test("calls Gemini when that provider is selected", async () => {
+    process.env.GEMINI_API_KEY = "AIza-test";
+    process.env.BLOGIFY_PROVIDER = "gemini";
+
+    globalThis.fetch = async () => ({
+      status: 200,
+      json: async () => ({
+        candidates: [{ content: { parts: [{ text: "Gemini post body" }] } }],
+      }),
+    });
+
+    const result = await generateCompletion("prompt");
+    assert.equal(result, "Gemini post body");
   });
 });

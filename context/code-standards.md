@@ -20,8 +20,8 @@
 
 ## CLI (Commander)
 
-- Each command (`init`, `generate`) lives in its own file under
-  `src/cli/`
+- Each command (`init`, `generate`, `setup`) lives in its own file
+  under `src/cli/`
 - Commands only parse args and call into `src/core` /
   `src/generator` — no business logic inside command handlers
 - Every command supports `--help` with clear usage text
@@ -35,14 +35,17 @@
 - Errors print a human-readable message, not a raw stack trace,
   unless `--verbose` is passed
 
-## Anthropic API Usage
+## LLM API Usage
 
 - All prompt construction lives in `src/generator/` — no inline
   prompts elsewhere
+- Provider selection and key persistence live in `src/config/`
+  (`credentials.ts`); interactive prompting lives in `src/cli/`
 - Validate the API response shape before writing output; fail
   with a clear error if the response is empty or malformed
 - Never retry silently more than once — a failed generation is
   reported to the user, not looped indefinitely
+- Never print or log API key values
 
 ## Data and Storage
 
@@ -54,8 +57,10 @@
 
 ## File Organization
 
-- `src/cli/` — command definitions (`init.ts`, `generate.ts`)
+- `src/cli/` — command definitions (`init.ts`, `generate.ts`,
+  `setup.ts`)
 - `src/core/` — file scanning + MD parsing
-- `src/generator/` — prompt building + Anthropic API calls
+- `src/generator/` — prompt building + provider API calls
+- `src/config/credentials.ts` — machine-level API key load/save
 - `src/output/` — output file writing + frontmatter generation
 - `src/config/` — config loading and merging

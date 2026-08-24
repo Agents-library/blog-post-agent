@@ -84,23 +84,37 @@ function snapshotTree(dir) {
 describe("architecture invariants", () => {
   let tempDir;
   let originalCwd;
-  let originalApiKey;
+  let originalEnv;
 
   beforeEach(() => {
     tempDir = mkdtempSync(join(tmpdir(), "blogify-hardening-"));
     originalCwd = process.cwd();
-    originalApiKey = process.env.ANTHROPIC_API_KEY;
+    originalEnv = {
+      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+      BLOGIFY_PROVIDER: process.env.BLOGIFY_PROVIDER,
+      BLOGIFY_HOME: process.env.BLOGIFY_HOME,
+    };
     process.env.ANTHROPIC_API_KEY = "test-api-key";
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+    delete process.env.BLOGIFY_PROVIDER;
+    process.env.BLOGIFY_HOME = tempDir;
     process.chdir(tempDir);
   });
 
   afterEach(() => {
     process.chdir(originalCwd);
 
-    if (originalApiKey === undefined) {
-      delete process.env.ANTHROPIC_API_KEY;
-    } else {
-      process.env.ANTHROPIC_API_KEY = originalApiKey;
+    for (const [name, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[name];
+      } else {
+        process.env[name] = value;
+      }
     }
 
     rmSync(tempDir, { recursive: true, force: true });
@@ -187,23 +201,37 @@ describe("architecture invariants", () => {
 describe("error paths", () => {
   let tempDir;
   let originalCwd;
-  let originalApiKey;
+  let originalEnv;
 
   beforeEach(() => {
     tempDir = mkdtempSync(join(tmpdir(), "blogify-errors-"));
     originalCwd = process.cwd();
-    originalApiKey = process.env.ANTHROPIC_API_KEY;
+    originalEnv = {
+      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+      BLOGIFY_PROVIDER: process.env.BLOGIFY_PROVIDER,
+      BLOGIFY_HOME: process.env.BLOGIFY_HOME,
+    };
     process.env.ANTHROPIC_API_KEY = "test-api-key";
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+    delete process.env.BLOGIFY_PROVIDER;
+    process.env.BLOGIFY_HOME = tempDir;
     process.chdir(tempDir);
   });
 
   afterEach(() => {
     process.chdir(originalCwd);
 
-    if (originalApiKey === undefined) {
-      delete process.env.ANTHROPIC_API_KEY;
-    } else {
-      process.env.ANTHROPIC_API_KEY = originalApiKey;
+    for (const [name, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[name];
+      } else {
+        process.env[name] = value;
+      }
     }
 
     rmSync(tempDir, { recursive: true, force: true });
@@ -224,7 +252,7 @@ describe("error paths", () => {
     );
   });
 
-  test("generate throws when ANTHROPIC_API_KEY is missing", async () => {
+  test("generate throws when no API key is configured", async () => {
     mkdirSync(join(tempDir, "context"));
     writeFileSync(
       join(tempDir, "context", "overview.md"),
@@ -234,8 +262,8 @@ describe("error paths", () => {
     delete process.env.ANTHROPIC_API_KEY;
 
     await assert.rejects(
-      () => runGenerate({}, { client: mockClient() }),
-      /ANTHROPIC_API_KEY environment variable is not set/,
+      () => runGenerate({}),
+      /No API key is configured/,
     );
   });
 

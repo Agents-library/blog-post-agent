@@ -26,6 +26,9 @@ Thumbs.db
 # Test coverage
 coverage/
 
+# Local npm pack tarballs (share the file; do not commit it)
+*.tgz
+
 # Blogify generated output — remove this block if you want to
 # commit example generated posts to the repo
 output/*

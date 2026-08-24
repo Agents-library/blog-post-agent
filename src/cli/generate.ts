@@ -6,11 +6,13 @@ import type { Command } from "commander";
 import ora from "ora";
 
 import { loadConfig } from "../config";
+import { providerLabel } from "../config/credentials";
 import type { ConfigOverrides } from "../config/types";
 import { scanContext } from "../core";
-import { buildPrompt, callAnthropic } from "../generator";
+import { buildPrompt, generateCompletion } from "../generator";
 import type { AnthropicClient } from "../generator";
 import { buildFrontmatter, writeOutput } from "../output";
+import { ensureApiSetup } from "./setup";
 
 export interface GenerateOptions {
   dir?: string;
@@ -126,14 +128,20 @@ export async function runGenerate(
     throw error;
   }
 
-  const apiSpinner = ora("Calling Anthropic API...").start();
+  const provider =
+    deps.client === undefined ? await ensureApiSetup() : undefined;
+  const providerName = provider ? providerLabel(provider) : "Anthropic";
+  const apiSpinner = ora(`Calling ${providerName} API...`).start();
   let body: string;
 
   try {
-    body = await callAnthropic(prompt, deps.client);
+    body = await generateCompletion(prompt, {
+      client: deps.client,
+      provider,
+    });
     apiSpinner.succeed("Generated blog post content");
   } catch (error) {
-    apiSpinner.fail("Anthropic API call failed");
+    apiSpinner.fail(`${providerName} API call failed`);
     throw error;
   }
 

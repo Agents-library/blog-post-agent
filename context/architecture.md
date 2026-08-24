@@ -6,7 +6,7 @@
 | ----------------- | ------------------------------------ | -------------------------------------------------- |
 | Runtime           | Node.js + TypeScript                 | CLI execution                                     |
 | CLI Framework      | Commander.js                         | Argument parsing, command routing                 |
-| AI Provider        | Anthropic SDK (`@anthropic-ai/sdk`)  | Blog post generation                              |
+| AI Provider        | Anthropic, OpenAI, Gemini, OpenRouter | Blog post generation (user-selected)            |
 | Markdown Parsing  | gray-matter + remark                 | Parse frontmatter and content from context files  |
 | CLI Output         | chalk + ora                          | Terminal color output, spinners                   |
 | Packaging          | npm (global install)                 | Distribution                                      |
@@ -14,13 +14,13 @@
 ## System Boundaries
 
 - `src/cli/` — command definitions and argument parsing only
-  (`init`, `generate`)
+  (`init`, `generate`, `setup`)
 - `src/core/` — file scanning and MD reading/parsing logic, no
   AI calls
-- `src/generator/` — prompt construction and Anthropic API
+- `src/generator/` — prompt construction and provider API
   calls, no file I/O
-- `src/config/` — loading and merging default config with
-  `blogify.config.json`
+- `src/config/` — loading/merging `blogify.config.json` plus
+  machine-level API key load/save (`credentials.ts`)
 - `src/output/` — writing the final MD file and generating
   frontmatter
 
@@ -32,16 +32,28 @@
   generated file, overwritten on each run
 - **Config**: optional `blogify.config.json` in the project
   root — folder paths, output naming
+- **Credentials**: `~/.blogify/credentials.json` plus user
+  environment variables — API keys, never stored in the project
 - No database, no remote storage — the tool is stateless between
-  runs
+  runs besides the saved machine-level API key
 
 ## Auth and Access Model
 
-- No user accounts. Auth is a single `ANTHROPIC_API_KEY`
-  environment variable, set once globally on the machine.
-- The API key is never persisted to disk — read from
-  `process.env` at runtime only.
-- No network calls are made except to the Anthropic API.
+- No user accounts. Auth is a machine-level API key for one of:
+  Anthropic, OpenAI, Gemini, or OpenRouter.
+- On first interactive `blogify generate` or `blogify setup`, if
+  no key is stored, Blogify asks the user to choose a provider
+  and enter a key. Pasting a key auto-detects the provider from
+  the key prefix (`sk-ant-`, `sk-`, `AIza`, `sk-or-`).
+- Keys are saved for the current user: user environment
+  variables on Windows, plus `~/.blogify/credentials.json`
+  (mode `0600`) on every platform. Project folders never store
+  keys.
+- Subsequent runs auto-select a provider: last saved provider
+  if its key is present, otherwise the only stored key, otherwise
+  the first available in Anthropic → OpenAI → Gemini → OpenRouter
+  order.
+- No network calls are made except to the selected provider API.
 
 ## Invariants
 

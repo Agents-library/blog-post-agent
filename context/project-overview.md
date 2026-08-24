@@ -22,13 +22,15 @@ into a single blog post.
 ## Core User Flow
 
 1. User installs Blogify globally (`npm install -g blogify`).
-2. User sets `ANTHROPIC_API_KEY` once as an environment variable.
+2. On first run, Blogify asks the user to choose Anthropic,
+   OpenAI, Gemini, or OpenRouter (or paste a key to auto-detect)
+   and saves the key on the machine.
 3. User creates a `context/` folder in their project and adds
    relevant MD files (README, architecture, changelog, etc.).
 4. User runs `blogify generate` from the project root.
 5. Blogify reads all `.md` files in `context/`, synthesizes
-   them, and writes a formatted blog post to
-   `output/blog-post.md`.
+   them with the saved provider, and writes a formatted blog post
+   to `output/blog-post.md`.
 6. User reviews and edits the generated post before publishing.
 
 ## Features
@@ -48,6 +50,7 @@ into a single blog post.
 - `blogify init` — scaffolds `context/` and `output/` folders in
   the current project
 - `blogify generate` — runs the scan + generate + write flow
+- `blogify setup` — choose a provider and save an API key
 - `--dir <path>` — override the context folder location
 - `--out <path>` — override the output file path
 
@@ -83,6 +86,7 @@ into a single blog post.
    Was Built → Key Decisions → Impact → Lessons structure every
    time.
 3. The tool works with zero project-specific configuration on a
-   fresh project — only global install + API key needed.
+   fresh project — only global install + a one-time provider
+   API key needed.
 4. No fabricated metrics appear in generated posts when source
    files contain no quantitative data.
